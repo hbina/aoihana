@@ -6,6 +6,7 @@ const int TEST_VEC_SIZE = 30;
 
 int main(int argc, char **argv)
 {
+    /// Create with capacity.
     Vec_int vec = vec_int_with_capacity(TEST_VEC_SIZE);
 
     /// Check insertion.
@@ -41,6 +42,24 @@ int main(int argc, char **argv)
         }
     }
 
+    /// Create with iota.
+    Vec_int vec_iota = vec_int_with_iota(30, 0, successor_int);
+
+    /// Check Vec created through iota and normal insertion matches.
+    for (int c = 0; c != TEST_VEC_SIZE; c++)
+    {
+        Vec_Result_int result_iota = vec_int_at(&vec_iota, TEST_VEC_SIZE);
+        Vec_Result_int result_vec = vec_int_at(&vec, TEST_VEC_SIZE);
+        if (result_iota.success && result_vec.success)
+        {
+            assert(result_iota.value == result_vec.value);
+        }
+        else
+        {
+            assert(true);
+        }
+    }
+
     /// Test folding over Vec calculating the sum.
     {
         const int free_fold_result = fold_int(vec.ptr, vec.len, 0, plus_int);
@@ -50,4 +69,5 @@ int main(int argc, char **argv)
 
     /// Cleanup!
     vec_int_destroy(&vec);
+    vec_int_destroy(&vec_iota);
 }

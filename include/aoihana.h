@@ -141,6 +141,17 @@
     }                                                                       \
   }
 
+/// Overflow check?
+#define DECLARE_INTEGER_OPERATIONS(type)    \
+  type successor_##type(const type value)   \
+  {                                         \
+    return value + 1;                       \
+  }                                         \
+  type predecessor_##type(const type value) \
+  {                                         \
+    return value - 1;                       \
+  }
+
 #define DECLARE_ARITHMETIC_OPERATIONS(type)            \
   type plus_##type(const type lhs, const type rhs)     \
   {                                                    \
@@ -160,6 +171,7 @@
   }
 
 #define IMPLEMENT_FOR_TYPE(type)       \
+  DECLARE_INTEGER_OPERATIONS(type);    \
   DECLARE_ARITHMETIC_OPERATIONS(type); \
   DECLARE_FOLD(type);                  \
   DECLARE_VEC(type);
