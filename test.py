@@ -17,7 +17,7 @@ def task(filename: Path):
     output_name = f"{Path(filename).stem}_test"
     final_output_file = f"{BUILD_DIR}/{output_name}"
 
-    subprocess.run(args=[C_COMPILER, filename, "-o",
+    subprocess.run(args=[C_COMPILER, filename, "-g", "-o",
                          final_output_file])
     subprocess.run(args=[final_output_file])
 

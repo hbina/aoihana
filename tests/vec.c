@@ -48,15 +48,15 @@ int main(int argc, char **argv)
     /// Check Vec created through iota and normal insertion matches.
     for (int c = 0; c != TEST_VEC_SIZE; c++)
     {
-        Vec_Result_int result_iota = vec_int_at(&vec_iota, TEST_VEC_SIZE);
-        Vec_Result_int result_vec = vec_int_at(&vec, TEST_VEC_SIZE);
+        Vec_Result_int result_iota = vec_int_at(&vec_iota, c);
+        Vec_Result_int result_vec = vec_int_at(&vec, c);
         if (result_iota.success && result_vec.success)
         {
             assert(result_iota.value == result_vec.value);
         }
         else
         {
-            assert(true);
+            assert(false);
         }
     }
 
