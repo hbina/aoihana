@@ -14,11 +14,9 @@
                   const type##_fold_function_sig f)                \
   {                                                                \
     int acc = init;                                                \
-    int index = 0;                                                 \
-    while (index != size)                                          \
+    for (int index = 0; index != size; index++)                    \
     {                                                              \
       acc = f(acc, *(arr + index));                                \
-      index = index + 1;                                           \
     }                                                              \
     return acc;                                                    \
   }
@@ -26,19 +24,16 @@
 #define DEFINE_FOREACH_FUNCTION_SIGNATURE(type) \
   typedef void (*type##_foreach_function_sig)(const type);
 
-#define DEFINE_FOREACH(type)                                       \
-  DEFINE_FOREACH_FUNCTION_SIGNATURE(type)                          \
-  int fold_##type(const type *arr, const int size, const int init, \
-                  const type##_foreach_function_sig f)             \
-  {                                                                \
-    int acc = init;                                                \
-    int index = 0;                                                 \
-    while (index != size)                                          \
-    {                                                              \
-      acc = f(acc, *(arr + index));                                \
-      index = index + 1;                                           \
-    }                                                              \
-    return acc;                                                    \
+#define DEFINE_FOREACH(type)                           \
+  DEFINE_FOREACH_FUNCTION_SIGNATURE(type)              \
+  int fold_##type(const type *arr, const int size,     \
+                  const type##_foreach_function_sig f) \
+  {                                                    \
+    for (int index = 0; index != size; index++)        \
+    {                                                  \
+      f(acc, *(arr + index));                          \
+    }                                                  \
+    return acc;                                        \
   }
 
 #define DEFINE_VEC_FOLD_FUNCTION_SIGNATURE(type) \
@@ -60,7 +55,7 @@
   Vec_Result_##type vec_##type##_result_create_error()              \
   {                                                                 \
     Vec_Result_##type result;                                       \
-    result.success = false;                                          \
+    result.success = false;                                         \
     /*result.value = value; // what should be here? */              \
     return result;                                                  \
   }
@@ -111,12 +106,7 @@
   type vec_##type##_fold(Vec_##type *vec, const type init,                 \
                          vec_##type##_fold_function_sig f)                 \
   {                                                                        \
-    type acc = init;                                                       \
-    for (int index = 0; index != vec->len; index++)                        \
-    {                                                                      \
-      acc = f(acc, *(vec->ptr + index));                                   \
-    }                                                                      \
-    return acc;                                                            \
+    return fold_##type(vec->ptr, vec->len, init, f);                       \
   }                                                                        \
   Vec_Result_##type vec_##type##_at(Vec_##type *vec, const int index)      \
   {                                                                        \
