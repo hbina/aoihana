@@ -9,36 +9,46 @@
 #define DECLARE_FOLD_FUNCTION_SIGNATURE(type) \
   typedef type (*type##_fold_function_sig)(const type, const type);
 
-#define DECLARE_FOLD(type)                                         \
-  DECLARE_FOLD_FUNCTION_SIGNATURE(type)                            \
-  int fold_##type(const type *arr, const int size, const int init, \
-                  const type##_fold_function_sig f)                \
-  {                                                                \
-    int acc = init;                                                \
-    for (int index = 0; index != size; index++)                    \
-    {                                                              \
-      acc = f(acc, *(arr + index));                                \
-    }                                                              \
-    return acc;                                                    \
+#define DECLARE_FOLD(type)                                           \
+  DECLARE_FOLD_FUNCTION_SIGNATURE(type)                              \
+  type fold_##type(const type *arr, const int size, const type init, \
+                   const type##_fold_function_sig f)                 \
+  {                                                                  \
+    type acc = init;                                                 \
+    for (int index = 0; index != size; index++)                      \
+    {                                                                \
+      acc = f(acc, *(arr + index));                                  \
+    }                                                                \
+    return acc;                                                      \
   }
 
 #define DECLARE_FOREACH_FUNCTION_SIGNATURE(type) \
   typedef void (*type##_foreach_function_sig)(const type);
 
-#define DECLARE_FOREACH(type)                          \
-  DECLARE_FOREACH_FUNCTION_SIGNATURE(type)             \
-  int fold_##type(const type *arr, const int size,     \
-                  const type##_foreach_function_sig f) \
-  {                                                    \
-    for (int index = 0; index != size; index++)        \
-    {                                                  \
-      f(acc, *(arr + index));                          \
-    }                                                  \
-    return acc;                                        \
+#define DECLARE_FOREACH(type)                              \
+  DECLARE_FOREACH_FUNCTION_SIGNATURE(type)                 \
+  void foreach_##type(const type *arr, const int size,     \
+                      const type##_foreach_function_sig f) \
+  {                                                        \
+    for (int index = 0; index != size; index++)            \
+    {                                                      \
+      f(*(arr + index));                                   \
+    }                                                      \
   }
 
-#define DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type) \
-  typedef type (*vec_##type##_fold_function_sig)(type, type);
+#define DECLARE_ENUMERATE_FUNCTION_SIGNATURE(type) \
+  typedef void (*type##_enumerate_function_sig)(const int, const type);
+
+#define DECLARE_ENUMERATE(type)                                \
+  DECLARE_ENUMERATE_FUNCTION_SIGNATURE(type)                   \
+  void enumerate_##type(const type *arr, const int size,       \
+                        const type##_enumerate_function_sig f) \
+  {                                                            \
+    for (int index = 0; index != size; index++)                \
+    {                                                          \
+      f(index, *(arr + index));                                \
+    }                                                          \
+  }
 
 #define DECLARE_VEC_IOTA_FUNCTION_SIGNATURE(type) \
   typedef type (*vec_##type##_iota_function_sig)(type);
@@ -65,6 +75,27 @@
     result.success = false;                                  \
     result.ptr = NULL;                                       \
     return result;                                           \
+  }
+
+#define DECLARE_RESULT_TYPE(type)                               \
+  typedef struct Result_##type##_                               \
+  {                                                             \
+    bool success;                                               \
+    type value;                                                 \
+  } Result_##type;                                              \
+  Result_##type result_##type##_create_ok(const type value)     \
+  {                                                             \
+    Result_##type result;                                       \
+    result.success = true;                                      \
+    result.value = value;                                       \
+    return result;                                              \
+  }                                                             \
+  Result_##type result_##type##_create_error()                  \
+  {                                                             \
+    Result_##type result;                                       \
+    result.success = false;                                     \
+    result.value; /* FIXME: Currently, access is undefined...*/ \
+    return result;                                              \
   }
 
 #define DECLARE_VEC(type)                                                                               \
@@ -109,6 +140,14 @@
     }                                                                                                   \
     return vec;                                                                                         \
   }                                                                                                     \
+  Vec_##type vec_##type##_from(type *ptr, const int len)                                                \
+  {                                                                                                     \
+    Vec_##type vec;                                                                                     \
+    vec.ptr = ptr;                                                                                      \
+    vec.len = len;                                                                                      \
+    vec.capacity = len;                                                                                 \
+    return vec;                                                                                         \
+  }                                                                                                     \
   void vec_##type##_push_back(Vec_##type *vec, const type x)                                            \
   {                                                                                                     \
     if (vec->len == vec->capacity)                                                                      \
@@ -126,12 +165,6 @@
     free(vec->ptr);                                                                                     \
     vec->ptr = NULL;                                                                                    \
     vec->len = 0;                                                                                       \
-  }                                                                                                     \
-  DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type);                                                            \
-  const type vec_##type##_fold(Vec_##type *const vec, const type init,                                  \
-                               vec_##type##_fold_function_sig f)                                        \
-  {                                                                                                     \
-    return fold_##type(vec->ptr, vec->len, init, f);                                                    \
   }                                                                                                     \
   const Vec_Result_##type vec_##type##_at(const Vec_##type *const vec, const int index)                 \
   {                                                                                                     \
@@ -176,6 +209,17 @@
     }                                                                                                   \
   }
 
+#define DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type) \
+  typedef type (*vec_##type##_fold_function_sig)(type, type);
+
+#define DECLARE_VEC_HELPER_FOLD_FUNCTION(type)                         \
+  DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type);                           \
+  const type vec_##type##_fold(Vec_##type *const vec, const type init, \
+                               vec_##type##_fold_function_sig f)       \
+  {                                                                    \
+    return fold_##type(vec->ptr, vec->len, init, f);                   \
+  }
+
 /// TODO: Overflow check?
 #define DECLARE_INTEGER_OPERATIONS(type)    \
   type successor_##type(const type value)   \
@@ -205,11 +249,13 @@
     return lhs / rhs;                                  \
   }
 
-#define IMPLEMENT_FOR_TYPE(type)       \
-  DECLARE_INTEGER_OPERATIONS(type);    \
-  DECLARE_ARITHMETIC_OPERATIONS(type); \
-  DECLARE_FOLD(type);                  \
-  DECLARE_VEC(type);
+#define IMPLEMENT_FOR_TYPE(type)          \
+  DECLARE_INTEGER_OPERATIONS(type);       \
+  DECLARE_ARITHMETIC_OPERATIONS(type);    \
+  DECLARE_FOLD(type);                     \
+  DECLARE_VEC(type);                      \
+  DECLARE_VEC_HELPER_FOLD_FUNCTION(type); \
+  DECLARE_ENUMERATE(type);
 
 IMPLEMENT_FOR_TYPE(char);
 IMPLEMENT_FOR_TYPE(int);
