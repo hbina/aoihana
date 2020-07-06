@@ -3,12 +3,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-#define FOLD_BINARY_OPERATIONS(type) \
+#define DEFINE_FOLD_FUNCTION_SIGNATURE(type) \
   typedef type (*type##_fold_function_sig)(const type, const type);
 
-#define FOLD(type)                                                 \
-  FOLD_BINARY_OPERATIONS(type)                                     \
+#define DEFINE_FOLD(type)                                          \
+  DEFINE_FOLD_FUNCTION_SIGNATURE(type)                             \
   int fold_##type(const type *arr, const int size, const int init, \
                   const type##_fold_function_sig f)                \
   {                                                                \
@@ -22,11 +23,11 @@
     return acc;                                                    \
   }
 
-#define FOREACH_BINARY_OPERATIONS(type) \
+#define DEFINE_FOREACH_FUNCTION_SIGNATURE(type) \
   typedef void (*type##_foreach_function_sig)(const type);
 
-#define FOREACH(type)                                              \
-  FOREACH_BINARY_OPERATIONS(type)                                  \
+#define DEFINE_FOREACH(type)                                       \
+  DEFINE_FOREACH_FUNCTION_SIGNATURE(type)                          \
   int fold_##type(const type *arr, const int size, const int init, \
                   const type##_foreach_function_sig f)             \
   {                                                                \
@@ -40,10 +41,32 @@
     return acc;                                                    \
   }
 
-#define VEC_FOLD_BINARY_OPERATIONS(type) \
+#define DEFINE_VEC_FOLD_FUNCTION_SIGNATURE(type) \
   typedef type (*vec_##type##_fold_function_sig)(type, type);
 
-#define VEC(type)                                                          \
+#define DEFINE_VEC_RESULT_TYPE(type)                                \
+  typedef struct Vec_Result_##type##_                               \
+  {                                                                 \
+    bool success;                                                   \
+    type value;                                                     \
+  } Vec_Result_##type;                                              \
+  Vec_Result_##type vec_##type##_result_create_ok(const type value) \
+  {                                                                 \
+    Vec_Result_##type result;                                       \
+    result.success = true;                                          \
+    result.value = value;                                           \
+    return result;                                                  \
+  }                                                                 \
+  Vec_Result_##type vec_##type##_result_create_error()              \
+  {                                                                 \
+    Vec_Result_##type result;                                       \
+    result.success = false;                                          \
+    /*result.value = value; // what should be here? */              \
+    return result;                                                  \
+  }
+
+#define DEFINE_VEC(type)                                                   \
+  DEFINE_VEC_RESULT_TYPE(type)                                             \
   typedef struct Vec_##type##_                                             \
   {                                                                        \
     type *ptr;                                                             \
@@ -84,7 +107,7 @@
     vec->ptr = NULL;                                                       \
     vec->len = 0;                                                          \
   }                                                                        \
-  VEC_FOLD_BINARY_OPERATIONS(type);                                        \
+  DEFINE_VEC_FOLD_FUNCTION_SIGNATURE(type);                                \
   type vec_##type##_fold(Vec_##type *vec, const type init,                 \
                          vec_##type##_fold_function_sig f)                 \
   {                                                                        \
@@ -95,12 +118,19 @@
     }                                                                      \
     return acc;                                                            \
   }                                                                        \
-  type vec_##type##_at(Vec_##type *vec, const int index)                   \
+  Vec_Result_##type vec_##type##_at(Vec_##type *vec, const int index)      \
   {                                                                        \
-    return *(vec->ptr + index);                                            \
+    if (index < vec->len)                                                  \
+    {                                                                      \
+      return vec_##type##_result_create_ok(*(vec->ptr + index));           \
+    }                                                                      \
+    else                                                                   \
+    {                                                                      \
+      return vec_##type##_result_create_error();                           \
+    }                                                                      \
   }
 
-#define ARITHMETIC_OPERATIONS(type)                    \
+#define DEFINE_ARITHMETIC_OPERATIONS(type)             \
   type plus_##type(const type lhs, const type rhs)     \
   {                                                    \
     return lhs + rhs;                                  \
@@ -118,10 +148,10 @@
     return lhs / rhs;                                  \
   }
 
-#define IMPLEMENT_FOR_TYPE(type) \
-  ARITHMETIC_OPERATIONS(type);   \
-  FOLD(type);                    \
-  VEC(type);
+#define IMPLEMENT_FOR_TYPE(type)      \
+  DEFINE_ARITHMETIC_OPERATIONS(type); \
+  DEFINE_FOLD(type);                  \
+  DEFINE_VEC(type);
 
 IMPLEMENT_FOR_TYPE(char);
 IMPLEMENT_FOR_TYPE(int);

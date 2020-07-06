@@ -11,4 +11,5 @@ int main(int argc, char **argv)
     }
     const int result = fold_int(vec.ptr, vec.len, 0, plus_int);
     assert(result == 30);
+    vec_int_destroy(&vec);
 }
