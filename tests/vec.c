@@ -50,6 +50,20 @@ void test_removing_element_based_on_index()
 
     assert(vec.len == 0);
     assert(vec.capacity == initial_capacity);
+
+    vec_int_destroy(&vec);
+}
+
+void test_apply_if_exist()
+{
+    Vec_int vec = vec_int_with_iota(5, 0, successor_int);
+    vec_int_apply_if_exist(&vec, 0, successor_int);
+    TEST_ACCESS_AND_VALUE(vec, 0, 1);
+    TEST_ACCESS_AND_VALUE(vec, 1, 1);
+    TEST_ACCESS_AND_VALUE(vec, 2, 2);
+    TEST_ACCESS_AND_VALUE(vec, 3, 3);
+    TEST_ACCESS_AND_VALUE(vec, 4, 4);
+    vec_int_destroy(&vec);
 }
 
 // TODO: Refactor these tests out into their own functions...
@@ -96,6 +110,8 @@ int main(int argc, char **argv)
     }
 
     test_removing_element_based_on_index();
+    test_apply_if_exist();
+
     /// Cleanup!
     vec_int_destroy(&vec);
     vec_int_destroy(&vec_iota);
