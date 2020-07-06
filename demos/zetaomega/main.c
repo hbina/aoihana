@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-typedef char *charPtr;
+typedef const char *charPtr;
 
 DECLARE_FOLD(charPtr);
 DECLARE_VEC(charPtr);
@@ -11,7 +11,7 @@ DECLARE_FOREACH(charPtr);
 DECLARE_ENUMERATE(charPtr);
 DECLARE_RESULT_TYPE(int);
 
-void print_value(const int index, char *const ptr)
+void print_value(const int index, const char *const ptr)
 {
     printf("index:%d value:%s\n", index, ptr);
 }
@@ -32,7 +32,7 @@ Result_int parse_int(const char *const optarg)
     }
 }
 
-int main(int argc, char **argv)
+int main(const int argc, const char **const argv)
 {
     if (argc != 4)
     {
@@ -40,12 +40,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    Vec_charPtr vec = vec_charPtr_from(argv, argc);
+    const Vec_charPtr vec = vec_charPtr_from(argv, argc);
     enumerate_charPtr(vec.ptr, vec.len, print_value);
 
-    Vec_Result_charPtr result_a = vec_charPtr_at(&vec, 1);
-    Vec_Result_charPtr result_b = vec_charPtr_at(&vec, 2);
-    Vec_Result_charPtr result_c = vec_charPtr_at(&vec, 3);
+    const Vec_Result_charPtr result_a = vec_charPtr_at(&vec, 1);
+    const Vec_Result_charPtr result_b = vec_charPtr_at(&vec, 2);
+    const Vec_Result_charPtr result_c = vec_charPtr_at(&vec, 3);
 
     if (result_a.success && result_b.success && result_c.success)
     {
