@@ -134,7 +134,7 @@
   {                                                                                           \
     if (index >= 0 && index < vec->len)                                                       \
     {                                                                                         \
-      return vec_##type##_result_create_ok((vec->ptr + index));                               \
+      return vec_##type##_result_create_ok(vec->ptr + index);                                 \
     }                                                                                         \
     else                                                                                      \
     {                                                                                         \
