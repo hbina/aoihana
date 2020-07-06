@@ -21,7 +21,7 @@ int main(int argc, char **argv)
         const Vec_Result_int result = vec_int_at(&vec, c);
         if (result.success)
         {
-            assert(result.value == c);
+            assert(*result.ptr == c);
         }
         else
         {
@@ -52,7 +52,7 @@ int main(int argc, char **argv)
         Vec_Result_int result_vec = vec_int_at(&vec, c);
         if (result_iota.success && result_vec.success)
         {
-            assert(result_iota.value == result_vec.value);
+            assert(*result_iota.ptr == *result_vec.ptr);
         }
         else
         {

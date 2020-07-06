@@ -42,25 +42,25 @@
 #define DECLARE_VEC_IOTA_FUNCTION_SIGNATURE(type) \
   typedef type (*vec_##type##_iota_function_sig)(type);
 
-#define DECLARE_VEC_RESULT_TYPE(type)                               \
-  typedef struct Vec_Result_##type##_                               \
-  {                                                                 \
-    bool success;                                                   \
-    type value;                                                     \
-  } Vec_Result_##type;                                              \
-  Vec_Result_##type vec_##type##_result_create_ok(const type value) \
-  {                                                                 \
-    Vec_Result_##type result;                                       \
-    result.success = true;                                          \
-    result.value = value;                                           \
-    return result;                                                  \
-  }                                                                 \
-  Vec_Result_##type vec_##type##_result_create_error()              \
-  {                                                                 \
-    Vec_Result_##type result;                                       \
-    result.success = false;                                         \
-    /*result.value = value; // what should be here? */              \
-    return result;                                                  \
+#define DECLARE_VEC_RESULT_TYPE(type)                        \
+  typedef struct Vec_Result_##type##_                        \
+  {                                                          \
+    bool success;                                            \
+    type *ptr;                                               \
+  } Vec_Result_##type;                                       \
+  Vec_Result_##type vec_##type##_result_create_ok(type *ptr) \
+  {                                                          \
+    Vec_Result_##type result;                                \
+    result.success = true;                                   \
+    result.ptr = ptr;                                        \
+    return result;                                           \
+  }                                                          \
+  Vec_Result_##type vec_##type##_result_create_error()       \
+  {                                                          \
+    Vec_Result_##type result;                                \
+    result.success = false;                                  \
+    result.ptr = NULL;                                       \
+    return result;                                           \
   }
 
 #define DECLARE_VEC(type)                                                   \
@@ -131,9 +131,9 @@
   }                                                                         \
   const Vec_Result_##type vec_##type##_at(Vec_##type *vec, const int index) \
   {                                                                         \
-    if (index < vec->len)                                                   \
+    if (index >= 0 && index < vec->len)                                     \
     {                                                                       \
-      return vec_##type##_result_create_ok(*(vec->ptr + index));            \
+      return vec_##type##_result_create_ok((vec->ptr + index));             \
     }                                                                       \
     else                                                                    \
     {                                                                       \
