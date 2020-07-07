@@ -60,6 +60,11 @@ void
 test_apply_if_exist()
 {
   Vec_int vec = vec_int_with_iota(5, 0, successor_int);
+  TEST_ACCESS_AND_VALUE(vec, 0, 0);
+  TEST_ACCESS_AND_VALUE(vec, 1, 1);
+  TEST_ACCESS_AND_VALUE(vec, 2, 2);
+  TEST_ACCESS_AND_VALUE(vec, 3, 3);
+  TEST_ACCESS_AND_VALUE(vec, 4, 4);
   vec_int_apply_if_exist(&vec, 0, successor_int);
   TEST_ACCESS_AND_VALUE(vec, 0, 1);
   TEST_ACCESS_AND_VALUE(vec, 1, 1);
