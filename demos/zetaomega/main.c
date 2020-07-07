@@ -20,8 +20,6 @@ print_value(const int index, const char* const ptr)
 Result_int
 parse_int(const char* const optarg)
 {
-  // TODO: Recalculate the actual `minval` and `maxval` that the algorithm can
-  // possibly handle.
   char* leftover_string = NULL;
   const int result = strtol(optarg, &leftover_string, 0);
   if (*leftover_string != '\0') {
