@@ -2,11 +2,12 @@
 
 #include "../include/aoihana.h"
 
-const int TEST_VEC_SIZE = 30;
-
 #define TEST_ACCESS_AND_VALUE(vec, index, value)                               \
   assert(vec_int_at(&vec, index).success == true &&                            \
          *vec_int_at(&vec, index).ptr == value);
+
+#define TEST_ACCESS_FAILURE(vec, index)                                        \
+  assert(vec_int_at(&vec, index).success == false);
 
 void
 test_removing_element_based_on_index()
@@ -74,52 +75,58 @@ test_apply_if_exist()
   vec_int_destroy(&vec);
 }
 
-// TODO: Refactor these tests out into their own functions...
-int
-main(int argc, char** argv)
+void
+test_basic_insertion()
 {
-  /// Create with capacity.
+  const int TEST_VEC_SIZE = 30;
   Vec_int vec = vec_int_with_capacity(TEST_VEC_SIZE);
 
-  /// Check insertion.
   for (int c = 0; c != TEST_VEC_SIZE; c++) {
     vec_int_push_back(&vec, c);
   }
 
-  /// Check access.
   for (int c = 0; c != TEST_VEC_SIZE; c++) {
-    const Vec_Result_int result = vec_int_at(&vec, c);
-    assert(result.success && *result.ptr == c);
+    TEST_ACCESS_AND_VALUE(vec, c, c);
   }
 
-  /// Check that access out of index will yield a negative result.
-  {
-    Vec_Result_int result = vec_int_at(&vec, TEST_VEC_SIZE);
-    assert(result.success == false);
-  }
+  vec_int_destroy(&vec);
+}
 
-  /// Create with iota.
-  Vec_int vec_iota = vec_int_with_iota(30, 0, successor_int);
+void
+test_invalid_access_yield_negative_result()
+{
+  const int TEST_VEC_SIZE = 5;
+  Vec_int vec = vec_int_with_iota(TEST_VEC_SIZE, 0, successor_int);
 
-  /// Check Vec created through iota and normal insertion matches.
   for (int c = 0; c != TEST_VEC_SIZE; c++) {
-    Vec_Result_int result_iota = vec_int_at(&vec_iota, c);
-    Vec_Result_int result_vec = vec_int_at(&vec, c);
-    assert(result_iota.success && result_vec.success &&
-           *result_iota.ptr == *result_vec.ptr);
+    TEST_ACCESS_AND_VALUE(vec, c, c);
   }
 
-  /// Test folding over Vec calculating the sum.
-  {
-    const int free_fold_result = fold_int(vec.ptr, vec.len, 0, plus_int);
-    const int vec_fold_result = vec_int_fold(&vec, 0, plus_int);
-    assert(free_fold_result == vec_fold_result);
-  }
+  TEST_ACCESS_FAILURE(vec, 5);
+  TEST_ACCESS_FAILURE(vec, -1);
+  TEST_ACCESS_FAILURE(vec, 3123);
+  TEST_ACCESS_FAILURE(vec, 2352432);
+  vec_int_destroy(&vec);
+}
 
+void
+test_folding_helper_function_is_correct()
+{
+  const int TEST_VEC_SIZE = 5;
+  Vec_int vec = vec_int_with_iota(TEST_VEC_SIZE, 0, successor_int);
+  const int free_fold_result = fold_int(vec.ptr, vec.len, 0, plus_int);
+  const int vec_fold_result = vec_int_fold(&vec, 0, plus_int);
+  assert(free_fold_result == vec_fold_result);
+  vec_int_destroy(&vec);
+}
+
+// TODO: Refactor these tests out into their own functions...
+int
+main(int argc, char** argv)
+{
+  test_basic_insertion();
+  test_invalid_access_yield_negative_result();
   test_removing_element_based_on_index();
   test_apply_if_exist();
-
-  /// Cleanup!
-  vec_int_destroy(&vec);
-  vec_int_destroy(&vec_iota);
+  test_folding_helper_function_is_correct();
 }
