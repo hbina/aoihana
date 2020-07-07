@@ -42,6 +42,8 @@ main(const int argc, const char** const argv)
     return -1;
   }
 
+  /// TODO: This is more like const array isn't it? Its not like I can push into
+  /// it anyways...
   const Vec_charPtr vec = vec_charPtr_from(argv, argc);
   enumerate_charPtr(vec.ptr, vec.len, print_value);
 
