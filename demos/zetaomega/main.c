@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdlib.h>
 
-typedef const char* charPtr;
+typedef char* charPtr;
 
 DECLARE_FOLD(charPtr);
 DECLARE_VEC(charPtr);
@@ -12,7 +12,7 @@ DECLARE_ENUMERATE(charPtr);
 DECLARE_RESULT_TYPE(int);
 
 void
-print_value(const int index, const char* const ptr)
+print_value(const int index, char* ptr)
 {
   printf("index:%d value:%s\n", index, ptr);
 }
@@ -34,7 +34,7 @@ parse_int(const char* const optarg)
 }
 
 int
-main(const int argc, const char** const argv)
+main(int argc, char** argv)
 {
   if (argc != 4) {
     printf("Aborting due to incorrect number of inputs. The program requires 3 "
