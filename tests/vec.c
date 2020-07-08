@@ -120,7 +120,6 @@ test_folding_helper_function_is_correct()
   vec_int_destroy(&vec);
 }
 
-// TODO: Refactor these tests out into their own functions...
 int
 main(int argc, char** argv)
 {
