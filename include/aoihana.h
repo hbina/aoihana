@@ -6,6 +6,47 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DECLARE_QUICKSORT_PREDICATE_FUNCTION_SIGNATURE(type)                   \
+  typedef bool (*quicksort_##type##_function_sig)(const type, const type);
+
+#define DECLARE_QUICKSORT_SWAP(type)                                           \
+  void quicksort_##type##_swap(type* lhs, type* rhs)                           \
+  {                                                                            \
+    const type tmp = *lhs;                                                     \
+    *lhs = *rhs;                                                               \
+    *rhs = tmp;                                                                \
+  }
+
+#define DECLARE_QUICKSORT(type)                                                \
+  DECLARE_QUICKSORT_SWAP(type);                                                \
+  int quicksort_##type##_partition(type* const ptr,                            \
+                                   const int lo,                               \
+                                   const int hi,                               \
+                                   const quicksort_##type##_function_sig f)    \
+  {                                                                            \
+    const type pivot = *(ptr + hi);                                            \
+    int i = lo;                                                                \
+    for (int j = lo; j != hi; j++) {                                           \
+      if (f(*(ptr + j), pivot)) {                                              \
+        quicksort_##type##_swap(ptr + i, ptr + j);                             \
+        i = i + 1;                                                             \
+      }                                                                        \
+    }                                                                          \
+    quicksort_##type##_swap(ptr + i, ptr + hi);                                \
+    return i;                                                                  \
+  }                                                                            \
+  void quicksort_##type(type* const ptr,                                       \
+                        const int lo,                                          \
+                        const int hi,                                          \
+                        const quicksort_##type##_function_sig f)               \
+  {                                                                            \
+    if (lo < hi) {                                                             \
+      int p = quicksort_##type##_partition(ptr, lo, hi, f);                    \
+      quicksort_##type(ptr, lo, p - 1, f);                                     \
+      quicksort_##type(ptr, p + 1, hi, f);                                     \
+    }                                                                          \
+  }
+
 #define DECLARE_FOLD_FUNCTION_SIGNATURE(type)                                  \
   typedef type (*type##_fold_function_sig)(const type, const type);
 
@@ -209,6 +250,13 @@
     } else {                                                                   \
       return false;                                                            \
     }                                                                          \
+  }                                                                            \
+  DECLARE_QUICKSORT_PREDICATE_FUNCTION_SIGNATURE(type);                        \
+  DECLARE_QUICKSORT(type);                                                     \
+  void vec_##type##_sort(Vec_##type* vec,                                      \
+                         const quicksort_##type##_function_sig f)              \
+  {                                                                            \
+    quicksort_##type(vec->ptr, 0, vec->len - 1, f);                            \
   }
 
 #define DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type)                              \
@@ -231,7 +279,13 @@
   type plus_##type(const type lhs, const type rhs) { return lhs + rhs; }       \
   type minus_##type(const type lhs, const type rhs) { return lhs - rhs; }      \
   type multiply_##type(const type lhs, const type rhs) { return lhs * rhs; }   \
-  type divide_##type(const type lhs, const type rhs) { return lhs / rhs; }
+  type divide_##type(const type lhs, const type rhs) { return lhs / rhs; }     \
+  bool eq_##type(const type lhs, const type rhs) { return lhs == rhs; }        \
+  bool neq_##type(const type lhs, const type rhs) { return lhs != rhs; }       \
+  bool le_##type(const type lhs, const type rhs) { return lhs < rhs; }         \
+  bool leq_##type(const type lhs, const type rhs) { return lhs <= rhs; }       \
+  bool ge_##type(const type lhs, const type rhs) { return lhs > rhs; }         \
+  bool geq_##type(const type lhs, const type rhs) { return lhs >= rhs; }
 
 #define IMPLEMENT_FOR_TYPE(type)                                               \
   DECLARE_INTEGER_OPERATIONS(type);                                            \

@@ -120,6 +120,28 @@ test_folding_helper_function_is_correct()
   vec_int_destroy(&vec);
 }
 
+void
+test_sorting()
+{
+  Vec_int vec = vec_int_with_iota(5, 5, predecessor_int);
+
+  TEST_ACCESS_AND_VALUE(vec, 0, 5);
+  TEST_ACCESS_AND_VALUE(vec, 1, 4);
+  TEST_ACCESS_AND_VALUE(vec, 2, 3);
+  TEST_ACCESS_AND_VALUE(vec, 3, 2);
+  TEST_ACCESS_AND_VALUE(vec, 4, 1);
+
+  vec_int_sort(&vec, le_int);
+
+  TEST_ACCESS_AND_VALUE(vec, 0, 1);
+  TEST_ACCESS_AND_VALUE(vec, 1, 2);
+  TEST_ACCESS_AND_VALUE(vec, 2, 3);
+  TEST_ACCESS_AND_VALUE(vec, 3, 4);
+  TEST_ACCESS_AND_VALUE(vec, 4, 5);
+
+  vec_int_destroy(&vec);
+}
+
 int
 main(int argc, char** argv)
 {
@@ -128,4 +150,5 @@ main(int argc, char** argv)
   test_removing_element_based_on_index();
   test_apply_if_exist();
   test_folding_helper_function_is_correct();
+  test_sorting();
 }
