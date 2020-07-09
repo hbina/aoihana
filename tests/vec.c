@@ -139,6 +139,14 @@ test_sorting()
   TEST_ACCESS_AND_VALUE(vec, 3, 4);
   TEST_ACCESS_AND_VALUE(vec, 4, 5);
 
+  vec_int_sort(&vec, ge_int);
+
+  TEST_ACCESS_AND_VALUE(vec, 0, 5);
+  TEST_ACCESS_AND_VALUE(vec, 1, 4);
+  TEST_ACCESS_AND_VALUE(vec, 2, 3);
+  TEST_ACCESS_AND_VALUE(vec, 3, 2);
+  TEST_ACCESS_AND_VALUE(vec, 4, 1);
+
   vec_int_destroy(&vec);
 }
 
