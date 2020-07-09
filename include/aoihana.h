@@ -93,7 +93,7 @@
   {                                                                            \
     Result_##type result;                                                      \
     result.success = false;                                                    \
-    /** result.value;  FIXME: Currently, access is undefined..**/              \
+    result.value; /* FIXME: Currently, access is undefined...*/                \
     return result;                                                             \
   }
 
@@ -241,8 +241,6 @@
   DECLARE_VEC_HELPER_FOLD_FUNCTION(type);                                      \
   DECLARE_ENUMERATE(type);
 
-// TODO: Declare more in the future.
-// Maybe even typedef all these types away into Rust-like type names.
 IMPLEMENT_FOR_TYPE(char);
 IMPLEMENT_FOR_TYPE(int);
 IMPLEMENT_FOR_TYPE(float);

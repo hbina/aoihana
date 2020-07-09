@@ -3,6 +3,8 @@
 #include <math.h>
 #include <stdlib.h>
 
+const float PI = 3.14159265359;
+
 typedef char* charPtr;
 
 DECLARE_FOLD(charPtr);
@@ -59,12 +61,12 @@ main(int argc, char** argv)
     if (a.success && b.success && c.success) {
       const double omega_n = sqrt(c.value / a.value);
       const double zeta = b.value / (2 * omega_n);
-      const double peak_time = M_PI / (omega_n * sqrt(1 - pow(zeta, 2)));
+      const double peak_time = PI / (omega_n * sqrt(1 - pow(zeta, 2)));
       const double rise_time =
         (1.76 * pow(zeta, 3) - 0.417 * pow(zeta, 2) + 1.039 * zeta + 1) /
         omega_n;
       const double overshoot_percentage =
-        exp(-(zeta * M_PI) / (sqrt(1 - pow(zeta, 2)))) * 100;
+        exp(-(zeta * PI) / (sqrt(1 - pow(zeta, 2)))) * 100;
       const double settling_time = 4 / (zeta * omega_n);
       printf("Obtained:\n\tomega_n:%f\n\tzeta:%f\n\tpeak_time:%f\n\trise_time:%"
              "f\n\tovershoot_percentage:%f\n\tsettling_time:%f\n",
