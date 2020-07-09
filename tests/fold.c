@@ -5,7 +5,7 @@
 const int TEST_VEC_SIZE = 30;
 
 int
-main(int argc, char** argv)
+main(void)
 {
   Vec_int vec = vec_int_with_default(TEST_VEC_SIZE, 1);
   const int result_fold = fold_int(vec.ptr, vec.len, 0, plus_int);

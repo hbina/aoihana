@@ -143,7 +143,7 @@ test_sorting()
 }
 
 int
-main(int argc, char** argv)
+main(void)
 {
   test_basic_insertion();
   test_invalid_access_yield_negative_result();
