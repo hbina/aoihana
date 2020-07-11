@@ -12,7 +12,7 @@ const float PI = 3.14159265359;
 typedef char* charPtr;
 
 DECLARE_FOLD(charPtr);
-DECLARE_VEC(charPtr);
+DECLARE_VIEW(charPtr);
 DECLARE_FOREACH(charPtr);
 DECLARE_ENUMERATE(charPtr);
 DECLARE_RESULT_TYPE(int);
@@ -50,12 +50,12 @@ main(int argc, char** argv)
 
   /// TODO: This is more like const array isn't it? Its not like I can push into
   /// it anyways...
-  const Vec_charPtr vec = vec_charPtr_from(argv, argc);
+  const View_charPtr vec = view_charPtr_from(argv, argc);
   enumerate_charPtr(vec.ptr, vec.len, print_value);
 
-  const ResultRef_charPtr result_a = vec_charPtr_at(vec, 1);
-  const ResultRef_charPtr result_b = vec_charPtr_at(vec, 2);
-  const ResultRef_charPtr result_c = vec_charPtr_at(vec, 3);
+  const ResultConstRef_charPtr result_a = view_charPtr_at(vec, 1);
+  const ResultConstRef_charPtr result_b = view_charPtr_at(vec, 2);
+  const ResultConstRef_charPtr result_c = view_charPtr_at(vec, 3);
 
   if (result_a.success && result_b.success && result_c.success) {
     const Result_int a = parse_int(*result_a.ptr);
