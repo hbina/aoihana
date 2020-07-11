@@ -1,9 +1,12 @@
 #include <assert.h>
 
+#include "aoihana/fold.h"
 #include "aoihana/functional.h"
 #include "aoihana/vector.h"
 
 DECLARE_VEC(int);
+DECLARE_FOLD(int);
+DECLARE_VEC_SORTABLE(int);
 DECLARE_ARITHMETIC_OPERATIONS(int);
 
 #define TEST_ACCESS_AND_VALUE(vec, index, value)                               \
@@ -154,6 +157,20 @@ test_sorting()
   vec_int_destroy(&vec);
 }
 
+void
+test_modify_reference()
+{
+  Vec_int vec = vec_int_with_iota(5, 0, successor_int);
+  ResultRef_int ref = vec_int_at(&vec, 1);
+  *ref.ptr = 0;
+  TEST_ACCESS_AND_VALUE(vec, 0, 0);
+  TEST_ACCESS_AND_VALUE(vec, 1, 0);
+  TEST_ACCESS_AND_VALUE(vec, 2, 2);
+  TEST_ACCESS_AND_VALUE(vec, 3, 3);
+  TEST_ACCESS_AND_VALUE(vec, 4, 4);
+  vec_int_destroy(&vec);
+}
+
 int
 main(void)
 {
@@ -163,4 +180,5 @@ main(void)
   test_apply_if_exist();
   test_folding_helper_function_is_correct();
   test_sorting();
+  test_modify_reference();
 }

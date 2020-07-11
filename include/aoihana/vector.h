@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fold.h"
 #include "quicksort.h"
 #include "result.h"
 
@@ -131,17 +130,22 @@
       return false;                                                            \
     }                                                                          \
   }                                                                            \
+  DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type);                                   \
+  const type vec_##type##_fold(                                                \
+    Vec_##type* const vec, const type init, vec_##type##_fold_function_sig f)  \
+  {                                                                            \
+    type acc = init;                                                           \
+    for (int index = 0; index != vec->len; index++) {                          \
+      acc = f(acc, *(vec->ptr + index));                                       \
+    }                                                                          \
+    return acc;                                                                \
+  }
+
+#define DECLARE_VEC_SORTABLE(type)                                             \
   DECLARE_QUICKSORT_PREDICATE_FUNCTION_SIGNATURE(type);                        \
   DECLARE_QUICKSORT(type);                                                     \
   void vec_##type##_sort(Vec_##type* vec,                                      \
                          const quicksort_##type##_function_sig f)              \
   {                                                                            \
     quicksort_##type(vec->ptr, 0, vec->len - 1, f);                            \
-  }                                                                            \
-  DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type);                                   \
-  DECLARE_FOLD(type);                                                          \
-  const type vec_##type##_fold(                                                \
-    Vec_##type* const vec, const type init, vec_##type##_fold_function_sig f)  \
-  {                                                                            \
-    return fold_##type(vec->ptr, vec->len, init, f);                           \
   }
