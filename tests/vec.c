@@ -1,6 +1,10 @@
 #include <assert.h>
 
-#include "../include/aoihana.h"
+#include "aoihana/functional.h"
+#include "aoihana/vector.h"
+
+DECLARE_VEC(int);
+DECLARE_ARITHMETIC_OPERATIONS(int);
 
 #define TEST_ACCESS_AND_VALUE(vec, index, value)                               \
   assert(vec_int_at(&vec, index).success == true &&                            \

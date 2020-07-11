@@ -1,15 +1,28 @@
 #include <assert.h>
+#include <stdlib.h>
 
-#include "../include/aoihana.h"
+#include "aoihana/fold.h"
+#include "aoihana/functional.h"
+
+DECLARE_FOLD(int);
+DECLARE_ARITHMETIC_OPERATIONS(int);
 
 const int TEST_VEC_SIZE = 30;
+const int INIT_VALUE = 10;
 
 int
 main(void)
 {
-  Vec_int vec = vec_int_with_default(TEST_VEC_SIZE, 1);
-  const int result_fold = fold_int(vec.ptr, vec.len, 0, plus_int);
-  const int result_vec_fold = vec_int_fold(&vec, 0, plus_int);
-  assert(result_fold == result_vec_fold);
-  vec_int_destroy(&vec);
+  int* ptr = (int*)malloc(sizeof(int) * TEST_VEC_SIZE);
+
+  int sum = INIT_VALUE;
+  for (int i = 0; i < TEST_VEC_SIZE; i++) {
+    *(ptr + i) = i;
+    sum += i;
+  }
+
+  const int result_fold = fold_int(ptr, TEST_VEC_SIZE, INIT_VALUE, plus_int);
+  assert(result_fold == sum);
+
+  free(ptr);
 }
