@@ -20,23 +20,23 @@
     return view;                                                               \
   }                                                                            \
   DECLARE_RESULT_TYPE_CONST_REF(type);                                         \
-  const ResultConstRef_##type view_##type##_at(const View_##type* const view,  \
+  const ResultConstRef_##type view_##type##_at(const View_##type const view,   \
                                                const int index)                \
   {                                                                            \
-    if (index >= 0 && index < view->len) {                                     \
-      return resultconstref_##type##_create_ok(view->ptr + index);             \
+    if (index >= 0 && index < view.len) {                                      \
+      return resultconstref_##type##_create_ok(view.ptr + index);              \
     } else {                                                                   \
       return resultconstref_##type##_create_error();                           \
     }                                                                          \
   }                                                                            \
   DECLARE_VIEW_FOLD_FUNCTION_SIGNATURE(type);                                  \
-  const type view_##type##_fold(View_##type* const view,                       \
+  const type view_##type##_fold(View_##type const view,                        \
                                 const type init,                               \
                                 view_##type##_fold_function_sig f)             \
   {                                                                            \
     type acc = init;                                                           \
-    for (int index = 0; index != view->len; index++) {                         \
-      acc = f(acc, *(view->ptr + index));                                      \
+    for (int index = 0; index != view.len; index++) {                          \
+      acc = f(acc, *(view.ptr + index));                                       \
     }                                                                          \
     return acc;                                                                \
   }

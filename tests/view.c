@@ -26,10 +26,10 @@ main(void)
   View_int view = view_int_from(ptr, TEST_VEC_SIZE);
 
   for (int i = 0; i < TEST_VEC_SIZE; i++) {
-    TEST_ACCESS_AND_VALUE(&view, i, i);
+    TEST_ACCESS_AND_VALUE(view, i, i);
   }
 
-  TEST_ACCESS_FAILURE(&view, TEST_VEC_SIZE);
+  TEST_ACCESS_FAILURE(view, TEST_VEC_SIZE);
 
   free(ptr);
 }

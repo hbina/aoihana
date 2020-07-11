@@ -10,11 +10,11 @@ DECLARE_VEC_SORTABLE(int);
 DECLARE_ARITHMETIC_OPERATIONS(int);
 
 #define TEST_ACCESS_AND_VALUE(vec, index, value)                               \
-  assert(vec_int_at(&vec, index).success == true &&                            \
-         *vec_int_at(&vec, index).ptr == value);
+  assert(vec_int_at(vec, index).success == true &&                             \
+         *vec_int_at(vec, index).ptr == value);
 
 #define TEST_ACCESS_FAILURE(vec, index)                                        \
-  assert(vec_int_at(&vec, index).success == false);
+  assert(vec_int_at(vec, index).success == false);
 
 void
 test_removing_element_based_on_index()
@@ -73,7 +73,7 @@ test_apply_if_exist()
   TEST_ACCESS_AND_VALUE(vec, 2, 2);
   TEST_ACCESS_AND_VALUE(vec, 3, 3);
   TEST_ACCESS_AND_VALUE(vec, 4, 4);
-  vec_int_apply_if_exist(&vec, 0, successor_int);
+  vec_int_apply_if_exist(vec, 0, successor_int);
   TEST_ACCESS_AND_VALUE(vec, 0, 1);
   TEST_ACCESS_AND_VALUE(vec, 1, 1);
   TEST_ACCESS_AND_VALUE(vec, 2, 2);
@@ -122,7 +122,7 @@ test_folding_helper_function_is_correct()
   const int TEST_VEC_SIZE = 5;
   Vec_int vec = vec_int_with_iota(TEST_VEC_SIZE, 0, successor_int);
   const int free_fold_result = fold_int(vec.ptr, vec.len, 0, plus_int);
-  const int vec_fold_result = vec_int_fold(&vec, 0, plus_int);
+  const int vec_fold_result = vec_int_fold(vec, 0, plus_int);
   assert(free_fold_result == vec_fold_result);
   vec_int_destroy(&vec);
 }
@@ -138,7 +138,7 @@ test_sorting()
   TEST_ACCESS_AND_VALUE(vec, 3, 2);
   TEST_ACCESS_AND_VALUE(vec, 4, 1);
 
-  vec_int_sort(&vec, le_int);
+  vec_int_sort(vec, le_int);
 
   TEST_ACCESS_AND_VALUE(vec, 0, 1);
   TEST_ACCESS_AND_VALUE(vec, 1, 2);
@@ -146,7 +146,7 @@ test_sorting()
   TEST_ACCESS_AND_VALUE(vec, 3, 4);
   TEST_ACCESS_AND_VALUE(vec, 4, 5);
 
-  vec_int_sort(&vec, ge_int);
+  vec_int_sort(vec, ge_int);
 
   TEST_ACCESS_AND_VALUE(vec, 0, 5);
   TEST_ACCESS_AND_VALUE(vec, 1, 4);
@@ -161,7 +161,7 @@ void
 test_modify_reference()
 {
   Vec_int vec = vec_int_with_iota(5, 0, successor_int);
-  ResultRef_int ref = vec_int_at(&vec, 1);
+  ResultRef_int ref = vec_int_at(vec, 1);
   *ref.ptr = 0;
   TEST_ACCESS_AND_VALUE(vec, 0, 0);
   TEST_ACCESS_AND_VALUE(vec, 1, 0);

@@ -78,7 +78,7 @@
     vec.capacity = len;                                                        \
     return vec;                                                                \
   }                                                                            \
-  void vec_##type##_push_back(Vec_##type* vec, const type x)                   \
+  void vec_##type##_push_back(Vec_##type* const vec, const type x)             \
   {                                                                            \
     if (vec->len == vec->capacity) {                                           \
       int new_cap = vec->capacity * 2 + 1;                                     \
@@ -96,11 +96,11 @@
     vec->len = 0;                                                              \
   }                                                                            \
   DECLARE_RESULT_TYPE_REF(type);                                               \
-  const ResultRef_##type vec_##type##_at(const Vec_##type* const vec,          \
+  const ResultRef_##type vec_##type##_at(const Vec_##type const vec,           \
                                          const int index)                      \
   {                                                                            \
-    if (index >= 0 && index < vec->len) {                                      \
-      return resultref_##type##_create_ok(vec->ptr + index);                   \
+    if (index >= 0 && index < vec.len) {                                       \
+      return resultref_##type##_create_ok(vec.ptr + index);                    \
     } else {                                                                   \
       return resultref_##type##_create_error();                                \
     }                                                                          \
@@ -120,7 +120,7 @@
   void vec_##type##_clear(Vec_##type* const vec) { vec->len = 0; }             \
   DECLARE_VEC_APPLY_FUNCTION_SIGNATURE(type)                                   \
   bool vec_##type##_apply_if_exist(                                            \
-    Vec_##type* vec, const int index, vec_##type##_apply_function_sig f)       \
+    Vec_##type vec, const int index, vec_##type##_apply_function_sig f)        \
   {                                                                            \
     ResultRef_##type result = vec_##type##_at(vec, index);                     \
     if (result.success) {                                                      \
@@ -132,11 +132,11 @@
   }                                                                            \
   DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type);                                   \
   const type vec_##type##_fold(                                                \
-    Vec_##type* const vec, const type init, vec_##type##_fold_function_sig f)  \
+    Vec_##type const vec, const type init, vec_##type##_fold_function_sig f)   \
   {                                                                            \
     type acc = init;                                                           \
-    for (int index = 0; index != vec->len; index++) {                          \
-      acc = f(acc, *(vec->ptr + index));                                       \
+    for (int index = 0; index != vec.len; index++) {                           \
+      acc = f(acc, *(vec.ptr + index));                                        \
     }                                                                          \
     return acc;                                                                \
   }
@@ -144,8 +144,8 @@
 #define DECLARE_VEC_SORTABLE(type)                                             \
   DECLARE_QUICKSORT_PREDICATE_FUNCTION_SIGNATURE(type);                        \
   DECLARE_QUICKSORT(type);                                                     \
-  void vec_##type##_sort(Vec_##type* vec,                                      \
+  void vec_##type##_sort(Vec_##type vec,                                       \
                          const quicksort_##type##_function_sig f)              \
   {                                                                            \
-    quicksort_##type(vec->ptr, 0, vec->len - 1, f);                            \
+    quicksort_##type(vec.ptr, 0, vec.len - 1, f);                              \
   }
