@@ -13,4 +13,10 @@ test_view:
 	gcc ./tests/view.c -g -Wall -Iinclude/ -o ./build/test_view
 	valgrind --leak-check=full --show-leak-kinds=all ./build/test_view
 
-test: test_fold test_vec test_view
+test_vec_name:
+	mkdir -p ./build
+	gcc ./tests/vec_name.c -g -Wall -Iinclude/ -o ./build/test_vec_name
+	valgrind --leak-check=full --show-leak-kinds=all ./build/test_vec_name
+
+
+test: test_fold test_vec test_view test_vec_name

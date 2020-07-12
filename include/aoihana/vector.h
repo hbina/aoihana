@@ -8,80 +8,78 @@
 #include "quicksort.h"
 #include "result.h"
 
-#define DECLARE_VEC_IOTA_FUNCTION_SIGNATURE(type)                              \
-  typedef type (*vec_##type##_iota_function_sig)(const type);
+#define DECLARE_VEC_IOTA_FUNCTION_SIGNATURE(type, name)                        \
+  typedef type (*name##_iota_function_sig)(const type);
 
-#define DECLARE_VEC_APPLY_FUNCTION_SIGNATURE(type)                             \
-  typedef type (*vec_##type##_apply_function_sig)(const type);
+#define DECLARE_VEC_APPLY_FUNCTION_SIGNATURE(type, name)                       \
+  typedef type (*name##_apply_function_sig)(const type);
 
-#define DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type)                              \
-  typedef type (*vec_##type##_fold_function_sig)(const type, const type);
+#define DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type, name)                        \
+  typedef type (*name##_fold_function_sig)(const type, const type);
 
-#define DECLARE_VEC_FIND_FUNCTION_SIGNATURE(type)                              \
-  typedef bool (*vec_##type##_find_function_sig)(const type);
+#define DECLARE_VEC_FIND_FUNCTION_SIGNATURE(type, name)                        \
+  typedef bool (*name##_find_function_sig)(const type);
 
-#define DECLARE_VEC(type)                                                      \
-  typedef struct Vec_##type##_                                                 \
+#define DECLARE_VEC_INTERNAL(type, name)                                       \
+  typedef struct name##_                                                       \
   {                                                                            \
     type* ptr;                                                                 \
     int len;                                                                   \
     int capacity;                                                              \
-  } Vec_##type;                                                                \
-  void vec_##type##_push_back(Vec_##type* vec, const type x);                  \
+  } name;                                                                      \
+  void name##_push_back(name* vec, const type x);                              \
   /** Everything below this is actually the definition.*/                      \
-  Vec_##type vec_##type##_new()                                                \
+  name name##_new()                                                            \
   {                                                                            \
-    Vec_##type vec;                                                            \
+    name vec;                                                                  \
     vec.ptr = (type*)malloc(1 * sizeof(type));                                 \
     vec.len = 0;                                                               \
     vec.capacity = 1;                                                          \
     return vec;                                                                \
   }                                                                            \
-  Vec_##type vec_##type##_with_capacity(const int capacity)                    \
+  name name##_with_capacity(const int capacity)                                \
   {                                                                            \
-    Vec_##type vec;                                                            \
+    name vec;                                                                  \
     vec.ptr = (type*)malloc(capacity * sizeof(type));                          \
     vec.len = 0;                                                               \
     vec.capacity = capacity;                                                   \
     return vec;                                                                \
   }                                                                            \
-  DECLARE_VEC_IOTA_FUNCTION_SIGNATURE(type);                                   \
-  Vec_##type vec_##type##_with_iota(const int capacity,                        \
-                                    const type init,                           \
-                                    const vec_##type##_iota_function_sig f)    \
+  DECLARE_VEC_IOTA_FUNCTION_SIGNATURE(type, name);                             \
+  name name##_with_iota(                                                       \
+    const int capacity, const type init, const name##_iota_function_sig f)     \
   {                                                                            \
-    Vec_##type vec;                                                            \
+    name vec;                                                                  \
     vec.ptr = (type*)malloc(capacity * sizeof(type));                          \
     vec.len = 0;                                                               \
     vec.capacity = capacity;                                                   \
     type iota = init;                                                          \
     for (int index = 0; index != capacity; index++) {                          \
-      vec_##type##_push_back(&vec, iota);                                      \
+      name##_push_back(&vec, iota);                                            \
       iota = f(iota);                                                          \
     }                                                                          \
     return vec;                                                                \
   }                                                                            \
-  Vec_##type vec_##type##_with_default(const int capacity,                     \
-                                       const type default_value)               \
+  name name##_with_default(const int capacity, const type default_value)       \
   {                                                                            \
-    Vec_##type vec;                                                            \
+    name vec;                                                                  \
     vec.ptr = (type*)malloc(capacity * sizeof(type));                          \
     vec.len = 0;                                                               \
     vec.capacity = capacity;                                                   \
     for (int index = 0; index != capacity; index++) {                          \
-      vec_##type##_push_back(&vec, default_value);                             \
+      name##_push_back(&vec, default_value);                                   \
     }                                                                          \
     return vec;                                                                \
   }                                                                            \
-  Vec_##type vec_##type##_from(type* ptr, const int len)                       \
+  name name##_from(type* ptr, const int len)                                   \
   {                                                                            \
-    Vec_##type vec;                                                            \
+    name vec;                                                                  \
     vec.ptr = ptr;                                                             \
     vec.len = len;                                                             \
     vec.capacity = len;                                                        \
     return vec;                                                                \
   }                                                                            \
-  void vec_##type##_push_back(Vec_##type* const vec, const type x)             \
+  void name##_push_back(name* const vec, const type x)                         \
   {                                                                            \
     if (vec->len == vec->capacity) {                                           \
       int new_cap = vec->capacity * 2 + 1;                                     \
@@ -92,15 +90,14 @@
     vec->ptr[vec->len] = x;                                                    \
     vec->len = vec->len + 1;                                                   \
   }                                                                            \
-  void vec_##type##_destroy(Vec_##type* vec)                                   \
+  void name##_destroy(name* vec)                                               \
   {                                                                            \
     free(vec->ptr);                                                            \
     vec->ptr = NULL;                                                           \
     vec->len = 0;                                                              \
   }                                                                            \
   DECLARE_RESULT_TYPE_REF(type);                                               \
-  const ResultRef_##type vec_##type##_at(const Vec_##type const vec,           \
-                                         const int index)                      \
+  const ResultRef_##type name##_at(const name const vec, const int index)      \
   {                                                                            \
     if (index >= 0 && index < vec.len) {                                       \
       return resultref_##type##_create_ok(vec.ptr + index);                    \
@@ -108,7 +105,7 @@
       return resultref_##type##_create_error();                                \
     }                                                                          \
   }                                                                            \
-  const bool vec_##type##_remove(Vec_##type* const vec, const int index)       \
+  const bool name##_remove(name* const vec, const int index)                   \
   {                                                                            \
     if (index >= 0 && index < vec->len) {                                      \
       memmove(vec->ptr + index,                                                \
@@ -120,12 +117,12 @@
       return false;                                                            \
     }                                                                          \
   }                                                                            \
-  void vec_##type##_clear(Vec_##type* const vec) { vec->len = 0; }             \
-  DECLARE_VEC_APPLY_FUNCTION_SIGNATURE(type)                                   \
-  bool vec_##type##_apply_if_exist(                                            \
-    Vec_##type vec, const int index, vec_##type##_apply_function_sig f)        \
+  void name##_clear(name* const vec) { vec->len = 0; }                         \
+  DECLARE_VEC_APPLY_FUNCTION_SIGNATURE(type, name);                            \
+  bool name##_apply_if_exist(                                                  \
+    name vec, const int index, name##_apply_function_sig f)                    \
   {                                                                            \
-    ResultRef_##type result = vec_##type##_at(vec, index);                     \
+    ResultRef_##type result = name##_at(vec, index);                           \
     if (result.success) {                                                      \
       *result.ptr = f(*result.ptr);                                            \
       return true;                                                             \
@@ -133,9 +130,9 @@
       return false;                                                            \
     }                                                                          \
   }                                                                            \
-  DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type);                                   \
-  const type vec_##type##_fold(                                                \
-    Vec_##type const vec, const type init, vec_##type##_fold_function_sig f)   \
+  DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type, name);                             \
+  const type name##_fold(                                                      \
+    name const vec, const type init, name##_fold_function_sig f)               \
   {                                                                            \
     type acc = init;                                                           \
     for (int index = 0; index != vec.len; index++) {                           \
@@ -143,9 +140,9 @@
     }                                                                          \
     return acc;                                                                \
   }                                                                            \
-  DECLARE_VEC_FIND_FUNCTION_SIGNATURE(type);                                   \
-  const ResultRef_##type vec_##type##_find(Vec_##type* const vec,              \
-                                           vec_##type##_find_function_sig f)   \
+  DECLARE_VEC_FIND_FUNCTION_SIGNATURE(type, name);                             \
+  const ResultRef_##type name##_find(name* const vec,                          \
+                                     name##_find_function_sig f)               \
   {                                                                            \
     for (int index = 0; index != vec->len; index++) {                          \
       if (f(*(vec->ptr + index))) {                                            \
@@ -154,15 +151,12 @@
     }                                                                          \
     return resultref_##type##_create_error();                                  \
   }                                                                            \
-  
-
-// TODO: This ought to be its own implementation.
-// So we can ditch the DECLARE_VEC_SORTABLE
-#define DECLARE_VEC_SORTABLE(type)                                             \
   DECLARE_QUICKSORT_PREDICATE_FUNCTION_SIGNATURE(type);                        \
   DECLARE_QUICKSORT(type);                                                     \
-  void vec_##type##_sort(Vec_##type vec,                                       \
-                         const quicksort_##type##_function_sig f)              \
+  void name##_sort(name vec, const quicksort_##type##_function_sig f)          \
   {                                                                            \
     quicksort_##type(vec.ptr, 0, vec.len - 1, f);                              \
   }
+
+#define DECLARE_VEC_NAME(type, name) DECLARE_VEC_INTERNAL(type, name)
+#define DECLARE_VEC(type) DECLARE_VEC_INTERNAL(type, Vec_##type)
