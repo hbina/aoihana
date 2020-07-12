@@ -12,6 +12,7 @@
   type minus_##type(const type lhs, const type rhs) { return lhs - rhs; }      \
   type multiply_##type(const type lhs, const type rhs) { return lhs * rhs; }   \
   type divide_##type(const type lhs, const type rhs) { return lhs / rhs; }     \
+  type mod_##type(const type lhs, const type rhs) { return lhs % rhs; }        \
   bool eq_##type(const type lhs, const type rhs) { return lhs == rhs; }        \
   bool neq_##type(const type lhs, const type rhs) { return lhs != rhs; }       \
   bool le_##type(const type lhs, const type rhs) { return lhs < rhs; }         \
