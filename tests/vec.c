@@ -161,13 +161,28 @@ void
 test_modify_reference()
 {
   Vec_int vec = vec_int_with_iota(5, 0, successor_int);
-  ResultRef_int ref = vec_int_at(vec, 1);
+  const ResultRef_int ref = vec_int_at(vec, 1);
   *ref.ptr = 0;
   TEST_ACCESS_AND_VALUE(vec, 0, 0);
   TEST_ACCESS_AND_VALUE(vec, 1, 0);
   TEST_ACCESS_AND_VALUE(vec, 2, 2);
   TEST_ACCESS_AND_VALUE(vec, 3, 3);
   TEST_ACCESS_AND_VALUE(vec, 4, 4);
+  vec_int_destroy(&vec);
+}
+
+bool
+is_23(const int x)
+{
+  return x == 23;
+}
+
+void
+test_find_element()
+{
+  Vec_int vec = vec_int_with_iota(30, 0, successor_int);
+  ResultRef_int ref = vec_int_find(&vec, is_23);
+  assert(ref.success && *ref.ptr == 23);
   vec_int_destroy(&vec);
 }
 
@@ -181,4 +196,5 @@ main(void)
   test_folding_helper_function_is_correct();
   test_sorting();
   test_modify_reference();
+  test_find_element();
 }

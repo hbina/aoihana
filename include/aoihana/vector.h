@@ -17,6 +17,9 @@
 #define DECLARE_VEC_FOLD_FUNCTION_SIGNATURE(type)                              \
   typedef type (*vec_##type##_fold_function_sig)(const type, const type);
 
+#define DECLARE_VEC_FIND_FUNCTION_SIGNATURE(type)                              \
+  typedef bool (*vec_##type##_find_function_sig)(const type);
+
 #define DECLARE_VEC(type)                                                      \
   typedef struct Vec_##type##_                                                 \
   {                                                                            \
@@ -139,8 +142,22 @@
       acc = f(acc, *(vec.ptr + index));                                        \
     }                                                                          \
     return acc;                                                                \
-  }
+  }                                                                            \
+  DECLARE_VEC_FIND_FUNCTION_SIGNATURE(type);                                   \
+  const ResultRef_##type vec_##type##_find(Vec_##type* const vec,              \
+                                           vec_##type##_find_function_sig f)   \
+  {                                                                            \
+    for (int index = 0; index != vec->len; index++) {                          \
+      if (f(*(vec->ptr + index))) {                                            \
+        return resultref_##type##_create_ok(vec->ptr + index);                 \
+      }                                                                        \
+    }                                                                          \
+    return resultref_##type##_create_error();                                  \
+  }                                                                            \
+  
 
+// TODO: This ought to be its own implementation.
+// So we can ditch the DECLARE_VEC_SORTABLE
 #define DECLARE_VEC_SORTABLE(type)                                             \
   DECLARE_QUICKSORT_PREDICATE_FUNCTION_SIGNATURE(type);                        \
   DECLARE_QUICKSORT(type);                                                     \
