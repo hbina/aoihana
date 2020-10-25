@@ -53,3 +53,6 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+aoihana-cppcheck-build-dir/
+aoihana.cppcheck
