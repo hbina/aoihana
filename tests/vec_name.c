@@ -1,8 +1,8 @@
 #include <assert.h>
 
-#include "aoihana/fold.h"
-#include "aoihana/functional.h"
-#include "aoihana/vector.h"
+#include <aoihana/macros/fold.h>
+#include <aoihana/macros/functional.h>
+#include <aoihana/macros/vector.h>
 
 DECLARE_VEC_NAME(int, veci);
 DECLARE_FOLD(int);

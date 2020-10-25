@@ -1,8 +1,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "aoihana/fold.h"
-#include "aoihana/functional.h"
+#include <aoihana/macros/fold.h>
+#include <aoihana/macros/functional.h>
 
 DECLARE_FOLD(int);
 DECLARE_ARITHMETIC_OPERATIONS(int);

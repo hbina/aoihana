@@ -1,8 +1,8 @@
-#include "aoihana/enumerate.h"
-#include "aoihana/fold.h"
-#include "aoihana/foreach.h"
-#include "aoihana/vector.h"
-#include "aoihana/view.h"
+#include <aoihana/macros/enumerate.h>
+#include <aoihana/macros/fold.h>
+#include <aoihana/macros/foreach.h>
+#include <aoihana/macros/vector.h>
+#include <aoihana/macros/view.h>
 
 #include <math.h>
 #include <stdlib.h>
@@ -50,12 +50,12 @@ main(int argc, char** argv)
 
   /// TODO: This is more like const array isn't it? Its not like I can push into
   /// it anyways...
-  const View_charPtr vec = view_charPtr_from(argv, argc);
+  const View_charPtr vec = View_charPtr_from(argv, argc);
   enumerate_charPtr(vec.ptr, vec.len, print_value);
 
-  const ResultConstRef_charPtr result_a = view_charPtr_at(vec, 1);
-  const ResultConstRef_charPtr result_b = view_charPtr_at(vec, 2);
-  const ResultConstRef_charPtr result_c = view_charPtr_at(vec, 3);
+  const ResultConstRef_charPtr result_a = View_charPtr_at(vec, 1);
+  const ResultConstRef_charPtr result_b = View_charPtr_at(vec, 2);
+  const ResultConstRef_charPtr result_c = View_charPtr_at(vec, 3);
 
   if (result_a.success && result_b.success && result_c.success) {
     const Result_int a = parse_int(*result_a.ptr);

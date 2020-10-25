@@ -1,4 +1,4 @@
-#include "aoihana/view.h"
+#include <aoihana/macros/view.h>
 
 #include <assert.h>
 
