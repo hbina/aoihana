@@ -20,29 +20,38 @@
 #define TRUE 1
 #endif
 
-typedef struct
+typedef struct header
 {
   int len;
   int cap;
 } header;
 
-typedef struct
+typedef struct sv
 {
   void* ptr;
 } sv;
 
-#define sv_len(self) ((((header*)self.ptr) - 1)->len)
+#define DEBUG_PRINT(name, self)                                                \
+  printf("%s => sv cap:%d len:%d ptr:%p\n",                                    \
+         name,                                                                 \
+         sv_cap(self),                                                         \
+         sv_len(self),                                                         \
+         self.ptr)
+
+#define sv_get_header(self) ((header*)self.ptr - 1)
+
+#define sv_len(self) (sv_get_header(self)->len)
 
 #define sv_setlen(self, new_len)                                               \
   do {                                                                         \
-    (((header*)self.ptr) - 1)->len = new_len;                                  \
+    sv_get_header(self)->len = new_len;                                        \
   } while (0)
 
-#define sv_cap(self) ((((header*)self.ptr) - 1)->cap)
+#define sv_cap(self) (sv_get_header(self)->cap)
 
 #define sv_setcap(self, new_cap)                                               \
   do {                                                                         \
-    (((header*)self.ptr) - 1)->cap = new_cap;                                  \
+    sv_get_header(self)->cap = new_cap;                                        \
   } while (0)
 
 sv
@@ -55,12 +64,13 @@ new_sv()
 
 #define sv_free(self)                                                          \
   do {                                                                         \
-    free(((header*)self.ptr) - 1);                                             \
+    free((void*)sv_get_header(self));                                          \
+    self.ptr = NULL;                                                           \
   } while (0)
 
 #define sv_init(self, type, amount)                                            \
   do {                                                                         \
-    void* new_ptr = malloc(sizeof(type) * amount + sizeof(header));            \
+    void* new_ptr = malloc(sizeof(header) + (sizeof(type) * amount));          \
     if (new_ptr == NULL) {                                                     \
       HANDLE_ERROR;                                                            \
     } else {                                                                   \
@@ -73,27 +83,29 @@ new_sv()
 
 #define sv_reserve(self, type, new_cap)                                        \
   do {                                                                         \
-    void* new_ptr =                                                            \
-      realloc((void*)((header*)self.ptr - 1), new_cap * sizeof(type));         \
-    if (new_ptr == NULL) {                                                     \
-      HANDLE_ERROR;                                                            \
-    } else {                                                                   \
-      ((header*)new_ptr)->len = sv_len(self);                                  \
-      ((header*)new_ptr)->cap = new_cap;                                       \
-      void* arr_ptr = (void*)((header*)new_ptr + 1);                           \
-      sv_free(self);                                                           \
-      self.ptr = arr_ptr;                                                      \
+    if (new_cap > sv_cap(self)) {                                              \
+      void* new_ptr = malloc(sizeof(header) + (new_cap * sizeof(type)));       \
+      if (new_ptr == NULL) { /* Must notify caller this failed */              \
+      } else {                                                                 \
+        memcpy(new_ptr,                                                        \
+               sv_get_header(self),                                            \
+               sizeof(header) + (sv_cap(self) * sizeof(type)));                \
+        ((header*)new_ptr)->cap = new_cap;                                     \
+        void* arr_ptr = (void*)((header*)new_ptr + 1);                         \
+        free(sv_get_header(self));                                             \
+        self.ptr = arr_ptr;                                                    \
+      }                                                                        \
     }                                                                          \
   } while (0)
 
 #define sv_reinit(self, type)                                                  \
   do {                                                                         \
-    sv_reserve(self, type, sv_len(self) * 1.6);                                \
+    sv_reserve(self, type, sv_cap(self) * 2);                                  \
   } while (0)
 
 #define sv_insert(self, type, value, index)                                    \
   do {                                                                         \
-    if (self.ptr == NULL || index < 0 || sv_len(self) < index) {               \
+    if (self.ptr == NULL || index < 0 || sv_len(self) <= index) {              \
       HANDLE_ERROR;                                                            \
     }                                                                          \
     if (sv_len(self) == sv_cap(self)) {                                        \
@@ -106,7 +118,7 @@ new_sv()
 #define sv_pushback(self, type, value)                                         \
   do {                                                                         \
     if (self.ptr == NULL) {                                                    \
-      sv_init(self, type, 1);                                                  \
+      sv_init(self, type, 2);                                                  \
     }                                                                          \
     if (sv_cap(self) == sv_len(self)) {                                        \
       sv_reinit(self, type);                                                   \
@@ -115,9 +127,18 @@ new_sv()
     sv_setlen(self, sv_len(self) + 1);                                         \
   } while (0)
 
-#define sv_get(self, type, index)                                              \
-  ((type*)((index >= sv_len(self)) ? NULL : self.ptr + index))
+#define sv_get(self, type, index, output)                                      \
+  do {                                                                         \
+    if (index >= sv_len(self)) {                                               \
+      output = NULL;                                                           \
+    } else {                                                                   \
+      output = (type*)self.ptr + index;                                        \
+    }                                                                          \
+  } while (0)
 
 #define sv_empty(self) (sv_len(self) == 0)
 
-#define sv_clear(self) (sv_setlen(self, 0))
+#define sv_clear(self)                                                         \
+  do {                                                                         \
+    sv_setlen(self, 0);                                                        \
+  } while (0)
