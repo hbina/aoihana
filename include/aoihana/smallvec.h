@@ -1,6 +1,7 @@
 #pragma once
 
 #include <malloc.h>
+#include <stdbool.h>
 #include <string.h>
 
 #define HANDLE_ERROR                                                           \
@@ -128,6 +129,7 @@ new_sv()
   } while (0);
 
 #define sv_get(self, type, index, output)                                      \
+  int* ptr = NULL;                                                             \
   do {                                                                         \
     if (index >= sv_len(self)) {                                               \
       output = NULL;                                                           \
@@ -144,14 +146,26 @@ new_sv()
   } while (0);
 
 #define sv_fold(self, type, foldf, init, output)                               \
+  type output = init;                                                          \
   do {                                                                         \
-    *output = init;                                                            \
     for (int a = 0; a < sv_len(self); a++) {                                   \
       type* ptr__ = NULL;                                                      \
       sv_get(self, type, a, ptr__);                                            \
       if (ptr__ == NULL) {                                                     \
       } else {                                                                 \
-        foldf(output, ptr__);                                                  \
+        foldf(&output, ptr__);                                                 \
       }                                                                        \
     }                                                                          \
   } while (0);
+
+#define sv_contain(self, type, value, result)                                  \
+  bool result = false;                                                         \
+  do {                                                                         \
+    for (int a = 0; a < sv_len(self); a++) {                                   \
+      sv_get(self, type, a, ptr);                                              \
+      if (*ptr == value) {                                                     \
+        result = true;                                                         \
+      }                                                                        \
+    }                                                                          \
+    result = false;                                                            \
+  } while (0)
