@@ -69,24 +69,28 @@ new_sv()
     self.ptr = NULL;                                                           \
   } while (0);
 
-#define sv_init(self, type, amount)                                            \
+#define sv_init(self, type, amount, result)                                    \
+  bool result = false;                                                         \
   do {                                                                         \
     void* new_ptr = malloc(sizeof(header) + (sizeof(type) * amount));          \
     if (new_ptr == NULL) {                                                     \
-      HANDLE_ERROR;                                                            \
+      result = false;                                                          \
     } else {                                                                   \
       ((header*)new_ptr)->len = 0;                                             \
       ((header*)new_ptr)->cap = amount;                                        \
       void* arr_ptr = (void*)((header*)new_ptr + 1);                           \
       self.ptr = arr_ptr;                                                      \
+      result = true;                                                           \
     }                                                                          \
   } while (0);
 
-#define sv_reserve(self, type, new_cap)                                        \
+#define sv_reserve(self, type, new_cap, result)                                \
+  bool result = false;                                                         \
   do {                                                                         \
     if (new_cap > sv_cap(self)) {                                              \
       void* new_ptr = malloc(sizeof(header) + (new_cap * sizeof(type)));       \
       if (new_ptr == NULL) { /* Must notify caller this failed */              \
+        result = false;                                                        \
       } else {                                                                 \
         memcpy(new_ptr,                                                        \
                sv_get_header(self),                                            \
@@ -95,46 +99,64 @@ new_sv()
         void* arr_ptr = (void*)((header*)new_ptr + 1);                         \
         free(sv_get_header(self));                                             \
         self.ptr = arr_ptr;                                                    \
+        result = true;                                                         \
+      }                                                                        \
+    } else {                                                                   \
+      result = true;                                                           \
+    }                                                                          \
+  } while (0);
+
+#define sv_reinit(self, type, result)                                          \
+  bool result = false;                                                         \
+  do {                                                                         \
+    sv_reserve(self, type, sv_cap(self) * 2, result##reinit);                      \
+    result = result##reinit;                                                       \
+  } while (0);
+
+#define sv_insert(self, type, value, index, result)                            \
+  bool result = false;                                                         \
+  do {                                                                         \
+    if (self.ptr == NULL || index < 0 || sv_len(self) <= index) {              \
+      result = false;                                                          \
+    } else {                                                                   \
+      if (sv_len(self) == sv_cap(self)) {                                      \
+        sv_reinit(self, sizeof(type), result##insert);                             \
+        result = result##insert;                                                   \
+      } else {                                                                 \
+        result = true;                                                         \
+      }                                                                        \
+      if (result) {                                                            \
+        memmove(self.ptr + index, self.ptr + index + 1, sv_len(self) - index); \
+        *((type*)self.ptr + index) = value;                                    \
       }                                                                        \
     }                                                                          \
   } while (0);
 
-#define sv_reinit(self, type)                                                  \
-  do {                                                                         \
-    sv_reserve(self, type, sv_cap(self) * 2);                                  \
-  } while (0);
-
-#define sv_insert(self, type, value, index)                                    \
-  do {                                                                         \
-    if (self.ptr == NULL || index < 0 || sv_len(self) <= index) {              \
-      HANDLE_ERROR;                                                            \
-    }                                                                          \
-    if (sv_len(self) == sv_cap(self)) {                                        \
-      sv_reinit(self, sizeof(type));                                           \
-    }                                                                          \
-    memmove(self.ptr + index, self.ptr + index + 1, sv_len(self) - index);     \
-    *((type*)self.ptr + index) = value;                                        \
-  } while (0);
-
-#define sv_pushback(self, type, value)                                         \
+#define sv_pushback(self, type, value, result)                                 \
+  bool result = false;                                                         \
   do {                                                                         \
     if (self.ptr == NULL) {                                                    \
-      sv_init(self, type, 2);                                                  \
+      sv_init(self, type, 2, result##pushback);                                      \
+      result = result##pushback;                                                     \
+    } else if (sv_cap(self) == sv_len(self)) {                                 \
+      sv_reinit(self, type, result##pushback);                                       \
+      result = result##pushback;                                                     \
+    } else {                                                                   \
+      result = true;                                                           \
     }                                                                          \
-    if (sv_cap(self) == sv_len(self)) {                                        \
-      sv_reinit(self, type);                                                   \
+    if (result) {                                                              \
+      *((type*)self.ptr + sv_len(self)) = value;                               \
+      sv_setlen(self, sv_len(self) + 1);                                       \
     }                                                                          \
-    *((type*)self.ptr + sv_len(self)) = value;                                 \
-    sv_setlen(self, sv_len(self) + 1);                                         \
   } while (0);
 
-#define sv_get(self, type, index, output)                                      \
-  int* ptr = NULL;                                                             \
+#define sv_get(self, type, index, result)                                      \
+  int* result = NULL;                                                          \
   do {                                                                         \
     if (index >= sv_len(self)) {                                               \
-      output = NULL;                                                           \
+      result = NULL;                                                           \
     } else {                                                                   \
-      output = (type*)self.ptr + index;                                        \
+      result = (type*)self.ptr + index;                                        \
     }                                                                          \
   } while (0);
 
@@ -145,15 +167,14 @@ new_sv()
     sv_setlen(self, 0);                                                        \
   } while (0);
 
-#define sv_fold(self, type, foldf, init, output)                               \
-  type output = init;                                                          \
+#define sv_fold(self, type, foldf, init, result)                               \
+  type result = init;                                                          \
   do {                                                                         \
     for (int a = 0; a < sv_len(self); a++) {                                   \
-      type* ptr__ = NULL;                                                      \
-      sv_get(self, type, a, ptr__);                                            \
-      if (ptr__ == NULL) {                                                     \
+      sv_get(self, type, a, result##fold_iter);                                \
+      if (result##fold_iter == NULL) {                                         \
       } else {                                                                 \
-        foldf(&output, ptr__);                                                 \
+        foldf(&result, result##fold_iter);                                     \
       }                                                                        \
     }                                                                          \
   } while (0);
@@ -162,8 +183,8 @@ new_sv()
   bool result = false;                                                         \
   do {                                                                         \
     for (int a = 0; a < sv_len(self); a++) {                                   \
-      sv_get(self, type, a, ptr);                                              \
-      if (*ptr == value) {                                                     \
+      sv_get(self, type, a, result##contain);                                       \
+      if (*result##contain == value) {                                              \
         result = true;                                                         \
       }                                                                        \
     }                                                                          \
