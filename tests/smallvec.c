@@ -74,12 +74,12 @@ test_insert_in_the_middle()
   sv_free(vec);
 }
 
-void
+int
 fold_sum(void* acc_, void* iter_)
 {
   int* acc = (int*)acc_;
   int* iter = (int*)iter_;
-  *acc = *acc + *iter;
+  return *acc + *iter;
 }
 
 void
@@ -93,6 +93,30 @@ test_folding_summation()
   }
   sv_fold(vec, int, fold_sum, 0, ptr);
   assert(ptr == 45);
+
+  sv_free(vec);
+}
+
+bool
+find(void* lhs_, void* rhs_)
+{
+  int* lhs = (int*)lhs_;
+  int* rhs = (int*)rhs_;
+  return *lhs == *rhs;
+}
+
+void
+test_find_using_predicate()
+{
+  sv vec = new_sv();
+
+  for (int a = 0; a < 10; a++) {
+    sv_pushback(vec, int, a, success);
+    assert(success == true);
+  }
+  sv_find(vec, int, find, 5, find_result);
+  sv_get(vec, int, 5, get_result);
+  assert(find_result == get_result);
 
   sv_free(vec);
 }
@@ -119,4 +143,5 @@ main(void)
   test_pushback_many_elements();
   test_pushback_then_clear();
   test_folding_summation();
+  test_find_using_predicate();
 }

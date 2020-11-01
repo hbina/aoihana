@@ -109,8 +109,8 @@ new_sv()
 #define sv_reinit(self, type, result)                                          \
   bool result = false;                                                         \
   do {                                                                         \
-    sv_reserve(self, type, sv_cap(self) * 2, result##reinit);                      \
-    result = result##reinit;                                                       \
+    sv_reserve(self, type, sv_cap(self) * 2, result##reinit);                  \
+    result = result##reinit;                                                   \
   } while (0);
 
 #define sv_insert(self, type, value, index, result)                            \
@@ -120,8 +120,8 @@ new_sv()
       result = false;                                                          \
     } else {                                                                   \
       if (sv_len(self) == sv_cap(self)) {                                      \
-        sv_reinit(self, sizeof(type), result##insert);                             \
-        result = result##insert;                                                   \
+        sv_reinit(self, sizeof(type), result##insert);                         \
+        result = result##insert;                                               \
       } else {                                                                 \
         result = true;                                                         \
       }                                                                        \
@@ -136,11 +136,11 @@ new_sv()
   bool result = false;                                                         \
   do {                                                                         \
     if (self.ptr == NULL) {                                                    \
-      sv_init(self, type, 2, result##pushback);                                      \
-      result = result##pushback;                                                     \
+      sv_init(self, type, 2, result##pushback);                                \
+      result = result##pushback;                                               \
     } else if (sv_cap(self) == sv_len(self)) {                                 \
-      sv_reinit(self, type, result##pushback);                                       \
-      result = result##pushback;                                                     \
+      sv_reinit(self, type, result##pushback);                                 \
+      result = result##pushback;                                               \
     } else {                                                                   \
       result = true;                                                           \
     }                                                                          \
@@ -172,9 +172,19 @@ new_sv()
   do {                                                                         \
     for (int a = 0; a < sv_len(self); a++) {                                   \
       sv_get(self, type, a, result##fold_iter);                                \
-      if (result##fold_iter == NULL) {                                         \
-      } else {                                                                 \
-        foldf(&result, result##fold_iter);                                     \
+      result = foldf(&result, result##fold_iter);                              \
+    }                                                                          \
+  } while (0);
+
+#define sv_find(self, type, foldf, value, result)                              \
+  type* result = NULL;                                                         \
+  do {                                                                         \
+    type tmp##value##find = value;                                             \
+    for (int a = 0; a < sv_len(self); a++) {                                   \
+      sv_get(self, type, a, result##find);                                     \
+      if (foldf(&tmp##value##find, result##find)) {                                 \
+        result = result##find;                                                 \
+        break;                                                                 \
       }                                                                        \
     }                                                                          \
   } while (0);
@@ -183,8 +193,8 @@ new_sv()
   bool result = false;                                                         \
   do {                                                                         \
     for (int a = 0; a < sv_len(self); a++) {                                   \
-      sv_get(self, type, a, result##contain);                                       \
-      if (*result##contain == value) {                                              \
+      sv_get(self, type, a, result##contain);                                  \
+      if (*result##contain == value) {                                         \
         result = true;                                                         \
       }                                                                        \
     }                                                                          \
