@@ -78,10 +78,31 @@ test_insert_in_the_middle()
   sv_free(vec);
 }
 
+void
+fold_sum(void* acc_, void* iter_)
+{
+  int* acc = (int*)acc_;
+  int* iter = (int*)iter_;
+  *acc = *acc + *iter;
+}
+
+void
+test_folding_summation()
+{
+  sv vec = new_sv();
+  for (int a = 0; a < 10; a++) {
+    sv_pushback(vec, int, a);
+  }
+  int ptr = 0;
+  sv_fold(vec, int, fold_sum, 0, &ptr);
+  sv_free(vec);
+}
+
 int
 main(void)
 {
-  test_pushback_and_get();
-  test_pushback_many_elements();
-  test_pushback_then_clear();
+  // test_pushback_and_get();
+  // test_pushback_many_elements();
+  // test_pushback_then_clear();
+  test_folding_summation();
 }

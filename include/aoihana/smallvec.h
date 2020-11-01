@@ -45,14 +45,14 @@ typedef struct sv
 #define sv_setlen(self, new_len)                                               \
   do {                                                                         \
     sv_get_header(self)->len = new_len;                                        \
-  } while (0)
+  } while (0);
 
 #define sv_cap(self) (sv_get_header(self)->cap)
 
 #define sv_setcap(self, new_cap)                                               \
   do {                                                                         \
     sv_get_header(self)->cap = new_cap;                                        \
-  } while (0)
+  } while (0);
 
 sv
 new_sv()
@@ -66,7 +66,7 @@ new_sv()
   do {                                                                         \
     free((void*)sv_get_header(self));                                          \
     self.ptr = NULL;                                                           \
-  } while (0)
+  } while (0);
 
 #define sv_init(self, type, amount)                                            \
   do {                                                                         \
@@ -79,7 +79,7 @@ new_sv()
       void* arr_ptr = (void*)((header*)new_ptr + 1);                           \
       self.ptr = arr_ptr;                                                      \
     }                                                                          \
-  } while (0)
+  } while (0);
 
 #define sv_reserve(self, type, new_cap)                                        \
   do {                                                                         \
@@ -96,12 +96,12 @@ new_sv()
         self.ptr = arr_ptr;                                                    \
       }                                                                        \
     }                                                                          \
-  } while (0)
+  } while (0);
 
 #define sv_reinit(self, type)                                                  \
   do {                                                                         \
     sv_reserve(self, type, sv_cap(self) * 2);                                  \
-  } while (0)
+  } while (0);
 
 #define sv_insert(self, type, value, index)                                    \
   do {                                                                         \
@@ -113,7 +113,7 @@ new_sv()
     }                                                                          \
     memmove(self.ptr + index, self.ptr + index + 1, sv_len(self) - index);     \
     *((type*)self.ptr + index) = value;                                        \
-  } while (0)
+  } while (0);
 
 #define sv_pushback(self, type, value)                                         \
   do {                                                                         \
@@ -125,7 +125,7 @@ new_sv()
     }                                                                          \
     *((type*)self.ptr + sv_len(self)) = value;                                 \
     sv_setlen(self, sv_len(self) + 1);                                         \
-  } while (0)
+  } while (0);
 
 #define sv_get(self, type, index, output)                                      \
   do {                                                                         \
@@ -134,11 +134,24 @@ new_sv()
     } else {                                                                   \
       output = (type*)self.ptr + index;                                        \
     }                                                                          \
-  } while (0)
+  } while (0);
 
 #define sv_empty(self) (sv_len(self) == 0)
 
 #define sv_clear(self)                                                         \
   do {                                                                         \
     sv_setlen(self, 0);                                                        \
-  } while (0)
+  } while (0);
+
+#define sv_fold(self, type, foldf, init, output)                               \
+  do {                                                                         \
+    *output = init;                                                            \
+    for (int a = 0; a < sv_len(self); a++) {                                   \
+      type* ptr__ = NULL;                                                      \
+      sv_get(self, type, a, ptr__);                                            \
+      if (ptr__ == NULL) {                                                     \
+      } else {                                                                 \
+        foldf(output, ptr__);                                                  \
+      }                                                                        \
+    }                                                                          \
+  } while (0);
